@@ -20,18 +20,6 @@ public class Monster {
         Site monster = game.getMonsterSite();
         Site rogue = game.getRogueSite();
         Dungeon dungeon = game.getDungeon();
-//        List<Site> neighbors = dungeon.getNeighbors(monsterSite);
-//        int shortestDistance = 3*N;
-//        Site nextSite = monsterSite;
-//        for(Site neighbor: neighbors){
-//            int distance = neighbor.manhattanTo(rogueSite);
-//            if (distance == 0) return neighbor;
-//            if(distance <= shortestDistance && dungeon.isLegalMove(monsterSite,neighbor)){
-//                shortestDistance = distance;
-//                nextSite = neighbor;
-//            }
-//        }
-//        return nextSite; // 如果没有找到路径，保持不动
 
         boolean[][] visited = new boolean[N][N]; // 记录已访问的位置
         Site[][] previous = new Site[N][N];      // 记录每个位置的前驱节点，用于回溯路径
