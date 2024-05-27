@@ -4,6 +4,7 @@ import java.util.List;
 public class Dungeon {
     private boolean[][] isRoom;        // is v-w a room site?
     private boolean[][] isCorridor;    // is v-w a corridor site?
+    private List<Site> entrances;
     private int N;                     // dimension of dungeon
 
     // initialize a new dungeon based on the given board
@@ -11,10 +12,16 @@ public class Dungeon {
         N = board.length;
         isRoom     = new boolean[N][N];
         isCorridor = new boolean[N][N];
+        entrances = new ArrayList<Site>();
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if      (board[i][j] == '.') isRoom[i][j] = true;
-                else if (board[i][j] == '+') isCorridor[i][j] = true;
+                else if (board[i][j] == '+') {
+                    isCorridor[i][j] = true;
+                    if (board[i+1][j] == '.' || board[i-1][j] == '.' ||board[i][j+1] == '.' || board[i][j-1] == '.'){
+                        entrances.add(new Site(i,j));
+                    }
+                }
             }
         }
     }
@@ -78,6 +85,10 @@ public class Dungeon {
 //            }
         }
         return neighbors;
+    }
+
+    public List<Site> getEntrances(){
+        return entrances;
     }
 
 }
