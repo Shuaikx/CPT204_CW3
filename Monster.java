@@ -11,6 +11,13 @@ public class Monster extends Player{
     public Site move() {
         Site monster = game.getMonsterSite();
         Site rogue = game.getRogueSite();
-        return bfs.NextStep(monster, rogue);
+        try{
+            return bfs.bfs(monster, rogue);
+        }
+        catch (RuntimeException ex){
+            System.out.println("No path exists between Monster and Rogue.");
+            return monster;
+        }
+
     }
 }

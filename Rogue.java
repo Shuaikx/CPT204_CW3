@@ -14,14 +14,14 @@ public class Rogue extends Player {
         Site rogue = game.getRogueSite();
         List<Circle> circles = dungeon.getCircles();
         if(circles.isEmpty()){
-            return noCircle(monster, rogue);
+            return leaveMonster(monster, rogue);
         }
         else{
-            return hasCircle(monster, rogue, circles);
+            return approachCircle(monster, rogue, circles);
         }
     }
 
-    private Site hasCircle(Site monster, Site rogue, List<Circle> circles){
+    private Site approachCircle(Site monster, Site rogue, List<Circle> circles){
 
 
         List<Site> cannotStep = getStepsCloseMonster(monster, rogue);
@@ -29,19 +29,19 @@ public class Rogue extends Player {
 
         for(Circle circle: circles){
             if(!circle.isInCorridor(rogue)){
-                Site site = bfs.NextStep(rogue, circle.getEntrance1());
+                Site site = bfs.bfs(rogue, circle.getEntrance1());
                 if(!cannotStep.contains(site)) return site;
-                site = bfs.NextStep(rogue, circle.getEntrance2());
+                site = bfs.bfs(rogue, circle.getEntrance2());
                 if(!cannotStep.contains(site)) return site;
             }
             else{
-                return noCircle(monster, rogue);
+                return leaveMonster(monster, rogue);
             }
         }
-        return noCircle(monster,rogue);
+        return leaveMonster(monster,rogue);
     }
 
-    private Site noCircle(Site monster, Site rogue){
+    private Site leaveMonster(Site monster, Site rogue){
         List<Site> maxSites = getStepsAwayMonster(monster, rogue);
 
         // find the most remote point
@@ -69,12 +69,18 @@ public class Rogue extends Player {
 
     private List<Site> getStepsAwayMonster(Site monster, Site rogue){
         List<Site> maxSites = new ArrayList<Site>();
-        List<Site> neighbors = dungeon.getNeighbors(rogue);
+        List<Site> neighbors;
+        if(dungeon.isRoom(rogue)){
+            neighbors = dungeon.getNeighborsInRoom(rogue);
+        }
+        else{
+            neighbors = dungeon.getNeighborsInCorridor(rogue);
+        }
         int maxStep = -1;
         neighbors.add(rogue); // also test rogue original site
         for(Site neighbor: neighbors){
             if(!dungeon.isLegalMove(rogue, neighbor)) continue; // Test weather it is legal
-            bfs.NextStep(monster, neighbor);
+            bfs.bfs(monster, neighbor);
             int neighborStep = bfs.GetStepCount();
             if(neighborStep > maxStep){
                 maxSites.clear();
@@ -90,12 +96,18 @@ public class Rogue extends Player {
 
     private List<Site> getStepsCloseMonster(Site monster, Site rogue){
         List<Site> minSites = new ArrayList<Site>();
-        List<Site> neighbors = dungeon.getNeighbors(rogue);
+        List<Site> neighbors;
+        if(dungeon.isRoom(rogue)){
+            neighbors = dungeon.getNeighborsInRoom(rogue);
+        }
+        else{
+            neighbors = dungeon.getNeighborsInCorridor(rogue);
+        }
         int minStep = 2*N;
         neighbors.add(rogue); // also test rogue original site
         for(Site neighbor: neighbors){
             if(!dungeon.isLegalMove(rogue, neighbor)) continue; // Test weather it is legal
-            bfs.NextStep(monster, neighbor);
+            bfs.bfs(monster, neighbor);
             int neighborStep = bfs.GetStepCount();
             if(neighborStep < minStep){
                 minSites.clear();
@@ -106,7 +118,6 @@ public class Rogue extends Player {
                 minSites.add(neighbor);
             }
         }
-        // System.out.println("Minimum step： "+ minStep + "|" + minSites.getFirst().i()+ "|" + minSites.getFirst().j());
         return minSites;
     }
 }

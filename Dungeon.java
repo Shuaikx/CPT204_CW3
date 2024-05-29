@@ -10,6 +10,9 @@ public class Dungeon {
     private DFS dfs;
     private List<Circle> circles;
 
+    public static  String CORRIDOR = "Corridor";
+    public static  String ROOM = "Room";
+
     // initialize a new dungeon based on the given board
     public Dungeon(char[][] board) {
         N = board.length;
@@ -41,7 +44,7 @@ public class Dungeon {
 
         Site[][] pairs = getSitePairs(entrances);
         for (Site[] pair : pairs) {
-            boolean isCircle = dfs.isPathBetweenPoints(pair[0], pair[1]);
+            boolean isCircle = dfs.isPathBetweenPoints(pair[0], pair[1], Dungeon.CORRIDOR);
             if (isCircle) {
                 Circle newCircle = new Circle(pair[0], pair[1], dfs.getPath());
                 circles.add(newCircle);
@@ -93,9 +96,21 @@ public class Dungeon {
     }
 
     // add new function
-    public List<Site> getNeighbors(Site c) {
+    public List<Site> getNeighborsInRoom(Site c) {
         List<Site> neighbors = new ArrayList<>();
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+        for (int[] direction : directions) {
+            int newI = c.i() + direction[0];
+            int newJ = c.j() + direction[1];
+            Site neighbor = new Site(newI, newJ);
+            neighbors.add(neighbor);
+        }
+        return neighbors;
+    }
+
+    public List<Site> getNeighborsInCorridor(Site c) {
+        List<Site> neighbors = new ArrayList<>();
+        int[][] directions = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
         for (int[] direction : directions) {
             int newI = c.i() + direction[0];
             int newJ = c.j() + direction[1];
