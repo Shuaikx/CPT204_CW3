@@ -8,7 +8,7 @@ public class Test {
         Game game = new Game(stdin);
         Dungeon dungeon = game.getDungeon();
         Site monster = game.getMonsterSite();
-        System.out.println(dungeon.getNeighbors(monster));
+        System.out.println(dungeon.getEntrances());
     }
 
     public static void main(String[] args) {

@@ -8,45 +8,41 @@ public class Rogue extends Player {
         super(game);
     }
 
-
-
     @Override
     public Site move() {
         Site monster = game.getMonsterSite();
         Site rogue = game.getRogueSite();
-//        int maxDistance = -1;
-//        Site remoteFormMonster = monster;
-//        for(int i = 0; i<N; i++ ){
-//            for(int j = 0; j<N; j++ ){
-//                Site site = new Site(i,j);
-//                if(dungeon.isCorridor(site) || dungeon.isRoom(site)){
-//                    int distance = site.manhattanTo(monster);
-//                    if(distance >= maxDistance){
-//                        remoteFormMonster = site;
-//                        maxDistance = distance;
-//                    }
-//                }
-//            }
-//        }
-//        return bfs.NextStep(rogue, remoteFormMonster);
-        List<Site> neighbors = dungeon.getNeighbors(rogue);
-        int maxStep = -1;
-        List<Site> maxSites = new ArrayList<Site>();
-        neighbors.add(rogue); // also test rogue original site
-        for(Site neighbor: neighbors){
-            if(!dungeon.isLegalMove(rogue, neighbor)) continue; // Test weather it is legal
-            bfs.NextStep(monster, neighbor);
-            int neighborStep = bfs.GetStepCount();
-            System.out.println(neighborStep);
-            if(neighborStep > maxStep){
-                maxSites.clear();
-                maxSites.add(neighbor);
-                maxStep = neighborStep;
+        List<Circle> circles = dungeon.getCircles();
+        if(circles.isEmpty()){
+            return noCircle(monster, rogue);
+        }
+        else{
+            return hasCircle(monster, rogue, circles);
+        }
+    }
+
+    private Site hasCircle(Site monster, Site rogue, List<Circle> circles){
+
+
+        List<Site> cannotStep = getStepsCloseMonster(monster, rogue);
+        int minStep = 2*N;
+
+        for(Circle circle: circles){
+            if(!circle.isInCorridor(rogue)){
+                Site site = bfs.NextStep(rogue, circle.getEntrance1());
+                if(!cannotStep.contains(site)) return site;
+                site = bfs.NextStep(rogue, circle.getEntrance2());
+                if(!cannotStep.contains(site)) return site;
             }
-            else if(neighborStep == maxStep){
-                maxSites.add(neighbor);
+            else{
+                return noCircle(monster, rogue);
             }
         }
+        return noCircle(monster,rogue);
+    }
+
+    private Site noCircle(Site monster, Site rogue){
+        List<Site> maxSites = getStepsAwayMonster(monster, rogue);
 
         // find the most remote point
         if(maxSites.size()>1){
@@ -68,7 +64,49 @@ public class Rogue extends Player {
                 return remoteFormMonster;
             }
         }
-
         return maxSites.getFirst();
+    }
+
+    private List<Site> getStepsAwayMonster(Site monster, Site rogue){
+        List<Site> maxSites = new ArrayList<Site>();
+        List<Site> neighbors = dungeon.getNeighbors(rogue);
+        int maxStep = -1;
+        neighbors.add(rogue); // also test rogue original site
+        for(Site neighbor: neighbors){
+            if(!dungeon.isLegalMove(rogue, neighbor)) continue; // Test weather it is legal
+            bfs.NextStep(monster, neighbor);
+            int neighborStep = bfs.GetStepCount();
+            if(neighborStep > maxStep){
+                maxSites.clear();
+                maxSites.add(neighbor);
+                maxStep = neighborStep;
+            }
+            else if(neighborStep == maxStep){
+                maxSites.add(neighbor);
+            }
+        }
+        return maxSites;
+    }
+
+    private List<Site> getStepsCloseMonster(Site monster, Site rogue){
+        List<Site> minSites = new ArrayList<Site>();
+        List<Site> neighbors = dungeon.getNeighbors(rogue);
+        int minStep = 2*N;
+        neighbors.add(rogue); // also test rogue original site
+        for(Site neighbor: neighbors){
+            if(!dungeon.isLegalMove(rogue, neighbor)) continue; // Test weather it is legal
+            bfs.NextStep(monster, neighbor);
+            int neighborStep = bfs.GetStepCount();
+            if(neighborStep < minStep){
+                minSites.clear();
+                minSites.add(neighbor);
+                minStep = neighborStep;
+            }
+            else if(neighborStep == minStep){
+                minSites.add(neighbor);
+            }
+        }
+        // System.out.println("Minimum step： "+ minStep + "|" + minSites.getFirst().i()+ "|" + minSites.getFirst().j());
+        return minSites;
     }
 }

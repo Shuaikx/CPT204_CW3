@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,6 +7,8 @@ public class Dungeon {
     private boolean[][] isCorridor;    // is v-w a corridor site?
     private List<Site> entrances;
     private int N;                     // dimension of dungeon
+    private DFS dfs;
+    private List<Circle> circles;
 
     // initialize a new dungeon based on the given board
     public Dungeon(char[][] board) {
@@ -13,17 +16,38 @@ public class Dungeon {
         isRoom     = new boolean[N][N];
         isCorridor = new boolean[N][N];
         entrances = new ArrayList<Site>();
+        dfs = new DFS(this);
+        circles = new ArrayList<>();
+        entrances = new ArrayList<>();
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if      (board[i][j] == '.') isRoom[i][j] = true;
                 else if (board[i][j] == '+') {
                     isCorridor[i][j] = true;
-                    if (board[i+1][j] == '.' || board[i-1][j] == '.' ||board[i][j+1] == '.' || board[i][j-1] == '.'){
-                        entrances.add(new Site(i,j));
+                    List<int[]> directions = new ArrayList<int[]>();
+                    if(i>0) directions.add(new int[]{i-1,j});
+                    if(i<N-1) directions.add(new int[]{i+1,j});
+                    if(j>0) directions.add(new int[]{i,j-1});
+                    if(j<N-1) directions.add(new int[]{i,j+1});
+                    for(int[] direction: directions){
+                        if(board[direction[0]][direction[1]] == '.'){
+                            entrances.add(new Site(i,j));
+                            break;
+                        }
                     }
                 }
             }
         }
+
+        Site[][] pairs = getSitePairs(entrances);
+        for (Site[] pair : pairs) {
+            boolean isCircle = dfs.isPathBetweenPoints(pair[0], pair[1]);
+            if (isCircle) {
+                Circle newCircle = new Circle(pair[0], pair[1], dfs.getPath());
+                circles.add(newCircle);
+            }
+        }
+        System.out.println("Circles Count: "+circles.size());
     }
 
     // return dimension of dungeon
@@ -77,18 +101,26 @@ public class Dungeon {
             int newJ = c.j() + direction[1];
             Site neighbor = new Site(newI, newJ);
             neighbors.add(neighbor);
-//            if (isLegalMove(c, neighbor)) {
-//                neighbors.add(neighbor);
-//            }
-//            else{
-//                neighbors.add(new Site(-1,-1));
-//            }
         }
         return neighbors;
     }
 
-    public List<Site> getEntrances(){
-        return entrances;
-    }
+    public List<Site> getEntrances(){ return entrances;}
+    public DFS getDfs(){ return dfs;}
+    public List<Circle> getCircles(){ return circles;}
 
+    private Site[][] getSitePairs(List<Site> array) {
+        List<Site[]> pairsList = new ArrayList<>();
+
+        for (int i = 0; i < array.size(); i++) {
+            for (int j = i + 1; j < array.size(); j++) {
+                pairsList.add(new Site[]{array.get(i), array.get(j)});
+            }
+        }
+        Site[][] pairsArray = new Site[pairsList.size()][2];
+        for (int i = 0; i < pairsList.size(); i++) {
+            pairsArray[i] = pairsList.get(i);
+        }
+        return pairsArray;
+    }
 }

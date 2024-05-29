@@ -97,7 +97,7 @@ public class Game {
 
 
     public static void main(String[] args) {
-        String s = "/Dungeons/dungeonE.txt";
+        String s = "/Dungeons/dungeonB.txt";
         In stdin = new In(s);
         // In stdin = new In();
         Game game = new Game(stdin);

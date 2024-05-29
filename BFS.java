@@ -8,7 +8,6 @@ public class BFS extends SearchTool{
 
     private int stepCount = 0;
 
-    @Override
     public Site NextStep(Site start, Site end) {
         boolean[][] visited = new boolean[N][N]; // 记录已访问的位置
         Site[][] previous = new Site[N][N];      // 记录每个位置的前驱节点，用于回溯路径
@@ -56,14 +55,6 @@ public class BFS extends SearchTool{
 
         // 如果没有找到路径，则返回原位置
         return start;
-    }
-
-    protected boolean isValidMove(Site current, Site neighbor, boolean[][] visited) {
-        int i = neighbor.i(); // 获取邻居位置的行索引
-        int j = neighbor.j(); // 获取邻居位置的列索引
-        if (i < 0 || j < 0 || i >= N || j >= N) return false; // 检查是否越界
-        if (visited[i][j]) return false; // 检查是否已访问
-        return dungeon.isLegalMove(current, neighbor); // 检查移动是否合法
     }
 
     // 回溯路径并返回下一步的位置
